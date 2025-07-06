@@ -67,5 +67,5 @@ END
     make install
 }
 
-#build_python27
+build_python27
 
