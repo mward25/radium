@@ -83,18 +83,18 @@ PREFIX=`dirname $PWD/$0`
 build_faust() {
 
     if env |grep FAUST_USES_LLVM ; then
-	if ! env |grep LLVM_PATH ; then
-	    RED='\033[1;31m'
-	    NC='\033[0m'
-	    printf "${RED}LLVM_PATH not set${NC} (../../common_build.variables.sh not included?)\n"
-	fi
-	
-	if [ ! -f $LLVM_PATH/bin/llvm-config ] ; then
-	    RED='\033[1;31m'
-	    NC='\033[0m'
-	    printf "${RED}Error: \"${LLVM_PATH}\" doesn't seem to be valid...${NC}\n"
-	    exit -1
-	fi
+        if ! env |grep LLVM_PATH ; then
+            RED='\033[1;31m'
+            NC='\033[0m'
+            printf "${RED}LLVM_PATH not set${NC} (../../common_build.variables.sh not included?)\n"
+        fi
+
+        if [ ! -f $LLVM_PATH/bin/llvm-config ] ; then
+            RED='\033[1;31m'
+            NC='\033[0m'
+            printf "${RED}Error: \"${LLVM_PATH}\" doesn't seem to be valid...${NC}\n"
+            exit -1
+        fi
     fi
 
     rm -fr faust
@@ -152,6 +152,7 @@ build_faust() {
 build_Visualization-Library() {
 
     rm -fr Visualization-Library-master
+    pwd
     tar xvzf Visualization-Library-master.tar.gz 
     cd Visualization-Library-master/
     patch -p1 <../visualization.patch
@@ -310,16 +311,32 @@ build_xcb() {
     fi
 }
 
+pushd .
 source ./build_python27.sh
+popd
 
+pushd .
 build_Visualization-Library
+popd
 
+pushd .
 build_faust
+popd
+pushd .
 build_qhttpserver
+popd
+pushd .
 build_gc
+popd
+pushd .
 build_fluidsynth
+popd
+pushd .
 build_python27
+popd
+pushd .
 build_qscintilla # Note: Linking fails on Mac. Just ignore it.
+popd
 
 if uname -s |grep Linux ; then
     build_libpds
