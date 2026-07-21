@@ -28,7 +28,7 @@ UIC ?= uic
 BUILDTYPE ?= DEBUG
 #BUILDTYPE=RELEASE
 
-IS_LINUX_BINARY ?= 
+IS_LINUX_BINARY ?=
 
 
 # 5. Full path to a python2 executable.  (Think it needs to be at least V2.4)
@@ -119,7 +119,7 @@ S7OPTS ?=
 FAUSTDIR = $(shell pwd)/bin/packages/faust
 FAUST_LD_LIB_PATH ?=
 WHICHFAUST = $(FAUST_LD_LIB_PATH) $(FAUSTDIR)/build/bin/faust
-FAUST = $(WHICHFAUST) -I $(FAUSTDIR)/libraries/old # -I /home/kjetil/faust/architecture  
+FAUST = $(WHICHFAUST) -I $(FAUSTDIR)/libraries/old # -I /home/kjetil/faust/architecture
 
 # Get lots of warnings
 #ifneq (,$(findstring clang,$(CC)))
@@ -193,7 +193,7 @@ ifeq ($(USE_QSVGVIEWER),1)
 else ifeq ($(USE_QWEBENGINE),1)
 #  If using QtWebEngine:
   USE_QWEBENGINE_CFLAGS = -DUSE_QSVGVIEWER=0 -DUSE_QWEBENGINE=1
-  QT_CFLAGS += `$(PKGqt) --cflags Qt5WebEngine --cflags Qt5WebEngineCore  --cflags Qt5WebEngineWidgets` 
+  QT_CFLAGS += `$(PKGqt) --cflags Qt5WebEngine --cflags Qt5WebEngineCore  --cflags Qt5WebEngineWidgets`
   QT_LDFLAGS += `$(PKGqt) --libs Qt5WebEngine --libs Qt5WebEngineCore  --libs Qt5WebEngineWidgets`
 else
 #  If using QtWebKit:
@@ -311,8 +311,8 @@ VST_OPTS ?=
 BOOST_INCLUDE=-I${HOME}/boost_1_90_0 -I${HOME}/boost_1_89_0 -I${HOME}/boost_1_85_0 -I${HOME}/boost_1_83_0 -I${HOME}/boost_1_77_0 -I${HOME}/boost_1_76_0 -I${HOME}/boost_1_75_0 -I${HOME}/boost_1_70_0 -I${HOME}/boost_1_67_0 -I${HOME}/boost_1_63_0 $(WNO_DEPRECATED_BUILTINS)
 BOOST_FLAGS=$(WNO_CLASS_MEMACCESS) $(BOOST_INCLUDE)
 
-CRASHREPORTER_OPTS ?= 
-CRASHREPORTER_POSIX_OPTS ?= 
+CRASHREPORTER_OPTS ?=
+CRASHREPORTER_POSIX_OPTS ?=
 
 DEFINES=-DNOPAUSEPLAY -DCOMPILING_RADIUM -DUSE_WEAK_JACK
 #-DDISABLE_BDWGC <---- It makes a lot of sense to enable this option in DEBUG mode if using -fsanitize=address
@@ -449,7 +449,7 @@ UNDEFINED_SANITIZE_OPTS=-DRADIUM_USES_UBSAN -fsanitize=undefined -fsanitize=floa
 #UNDEFINED_SANITIZE_OPTS=
 
 ifdef USING_CLANG
-	UNDEFINED_SANITIZE_OPTS += -fno-sanitize=function -fno-sanitize=vptr 
+	UNDEFINED_SANITIZE_OPTS += -fno-sanitize=function -fno-sanitize=vptr
 endif
 
 ifeq ($(BUILD_OPTIMIZED), RELEASE)
@@ -470,13 +470,13 @@ ADDRESS_SANITIZE_OPTS ?= -fsanitize=address -fno-common -DRADIUM_USES_ASAN
 MEMORY_SANITIZE_OPTS=
 
 # Note that "./build_clean.sh" must be run if changing DEBUG_BUILD_OPTS or changing from RELEASE to DEBUG build.
-OS_DEBUG_BUILD_OPTS ?= 
+OS_DEBUG_BUILD_OPTS ?=
 #-mbranch-protection=standard -fno-sanitize-trap=all
-#-flto -fvisibility=hidden -fsanitize=cfi -fno-sanitize-trap=all # -fanalyzer 
+#-flto -fvisibility=hidden -fsanitize=cfi -fno-sanitize-trap=all # -fanalyzer
 DEBUG_BUILD_OPTS = $(WERROR) -Wfloat-equal -Wall $(GGDB_OPT) $(FNO_OPTIMIZE_SIBLING_CALLS) $(UNDEFINED_SANITIZE_OPTS) $(THREAD_SANITIZE_OPTS) $(ADDRESS_SANITIZE_OPTS) $(MEMORY_SANITIZE_OPTS) $(WNO_NAN_INFINITY_DISABLED) $(OS_DEBUG_BUILD_OPTS)
 
 # Slow. Also: asan/ubsan hopefully covers this stuff.
-# -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG -D_GLIBCXX_DEBUG 
+# -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG -D_GLIBCXX_DEBUG
 
 NOSHORTEN64TO32FLAG=
 ifdef USING_CLANG
@@ -490,10 +490,10 @@ S7OPTS += $(NOSHORTEN64TO32FLAG)
 ifdef USING_GCC
 #	ifeq ($(GCC_MAJOR),5)
 #		DEBUG_BUILD_OPTS += -Wshadow # gcc 4 has too many unnecessary positives
-#	endif	
+#	endif
 #	ifeq ($(GCC_MAJOR),6)
 #		DEBUG_BUILD_OPTS += -Wshadow # gcc 4 has too many unnecessary positives
-#	endif	
+#	endif
 
 #	CPUOPT += -Og	 # BEWARE: -Og DOES indeed very much destroy debug capabilites. (<optimized out>)
 endif
@@ -508,7 +508,7 @@ RELEASE_BUILD_OPTS = $(RELEASE_BUILD_OPTS_WITHOUT_NDEBUG) -DNDEBUG
 
 
 
-OS_OPTS ?= 
+OS_OPTS ?=
 OS_JUCE_LDFLAGS ?=
 OS_LDFLAGS ?=
 OS_LDFLAGS2 ?=
@@ -527,8 +527,8 @@ FLAGOPTS = $(DEFINES) -DGUIISQT -DFULL_VERSION=$(FULL_VERSION) -DIS_LITTLE_ENDIA
 
 RADIUM_VST2SDK_PATH ?= ${HOME}/SDKs/vstsdk2.4
 
-COMMONOPT = -fno-omit-frame-pointer -D__STDC_FORMAT_MACROS=1 -c `cat buildtype.opt` -I$(GCDIR)/include -I$(P) $(PYOPTS) `cat flagopts.opt` $(MIDIINC) $(OS_OPTS) $(VST_OPTS) -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-unknown-pragmas -fno-strict-aliasing -Wmissing-field-initializers -Wnull-dereference -Wwrite-strings $(WNO_VLA_CXX_EXTENSION) -DTHREADED_OPENGL=$(RADIUM_THREADED_OPENGL)  $(IS_LINUX_BINARY) $(IS_MACOS_BINARY) -I $(RADIUM_VST2SDK_PATH) 
-#-fdelete-null-pointer-checks 
+COMMONOPT = -fno-omit-frame-pointer -D__STDC_FORMAT_MACROS=1 -c `cat buildtype.opt` -I$(GCDIR)/include -I$(P) $(PYOPTS) `cat flagopts.opt` $(MIDIINC) $(OS_OPTS) $(VST_OPTS) -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-unknown-pragmas -fno-strict-aliasing -Wmissing-field-initializers -Wnull-dereference -Wwrite-strings $(WNO_VLA_CXX_EXTENSION) -DTHREADED_OPENGL=$(RADIUM_THREADED_OPENGL)  $(IS_LINUX_BINARY) $(IS_MACOS_BINARY) -I $(RADIUM_VST2SDK_PATH)
+#-fdelete-null-pointer-checks
 # $(WERROR)
 
 #-Wstrict-overflow=4 -Wsuggest-attribute=format -Wstringop-overflow=4
@@ -537,12 +537,12 @@ COMMONOPT = -fno-omit-frame-pointer -D__STDC_FORMAT_MACROS=1 -c `cat buildtype.o
 ifdef USING_CLANG
 	COMMONOPT += -Wno-deprecated-register -Wlogical-op-parentheses # -Wunused-member-function (isn't there a warning to warn about unused variables only, not methods?)
 else
-	COMMONOPT += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -fmax-errors=5 
+	COMMONOPT += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -fmax-errors=5
 endif
 
 #ifeq ($(GCC_MAJOR),7)
 #	COMMONOPT += -fstrong-eval-order # Remove this one until all recent compilers support -fstrong-eval-order
-#endif	
+#endif
 
 COMMONOPT += -DUSE_QT5
 
@@ -614,7 +614,7 @@ endif
 
 ifdef USING_CLANG
 	CPPOPT += -Wno-register
-endif	
+endif
 
 WNO_DUPLICATED_BRANCHES=
 ifdef USING_GCC
@@ -638,7 +638,7 @@ endif
 COMMON_QTOPTS =
 
 # QT4 opts
-QTOPT = $(CPPOPT) -DUSE_QT4 -DUSE_QIMAGE_BUFFER=1 $(QT_CFLAGS) $(COMMON_QTOPTS) # -DQT_NO_OPENGL 
+QTOPT = $(CPPOPT) -DUSE_QT4 -DUSE_QIMAGE_BUFFER=1 $(QT_CFLAGS) $(COMMON_QTOPTS) # -DQT_NO_OPENGL
 QTLINKFLAGS = $(QT_LDFLAGS)
 #$(GTK_LDFLAGS)
 
@@ -651,14 +651,14 @@ QTLINKFLAGS = $(QT_LDFLAGS)
 #
 
 # QT3 opts
-# 
+#
 #QTOPT = $(CPPOPT) -DUSE_QT3 `pkg-config --cflags qt-mt` $(COMMON_QTOPTS)
 #QTLINKFLAGS = `pkg-config --libs qt-mt` `pkg-config --libs gtk+-2.0`
 
 #QTLINKFLAGS = $(QT_LDFLAGS) -static `pkg-config --static --libs gtk+-2.0`
 #QTLINKFLAGS = $(QT_LDFLAGS) /tmp/radium/lib/libgtk-x11-2.0.a /tmp/radium/lib/libgdk-x11-2.0.a -L/tmp/radium/lib -latk-1.0 -lpangocairo-1.0 -lXext -lXrender -lXinerama -lXrandr -lXcursor -lXcomposite -lXdamage -lgdk_pixbuf-2.0 -lpangoft2-1.0 -lgio-2.0 -lXfixes -lcairo -lX11 -lpango-1.0  -lfreetype -lfontconfig -lgobject-2.0 -lglib-2.0
 
-#/home/kjetil/site/src/qt-x11-free-3.3.8b/lib/libqt.a 
+#/home/kjetil/site/src/qt-x11-free-3.3.8b/lib/libqt.a
 
 #`pkg-config --libs gtk+-2.0`
 #/tmp/radium/lib/ -static -lX11 -lXext -lXft -lXcursor -lXinerama -lXrandr -lSM
@@ -712,7 +712,7 @@ OBJ8= $(T)reltempo.o $(T)temponodes.o $(T)tempos.o $(T)time.o $(T)temponodes_leg
 
 #Playing
 OBJ9= $(T)Ptask2Mtask.o $(T)player.o $(T)scheduler.o $(T)scheduler_seqtracks.o $(T)scheduler_notes.o $(T)scheduler_reallines.o $(T)scheduler_LPB.o $(T)scheduler_Beats.o $(T)scheduler_Signature.o $(T)playerclass.o $(T)player_startstop.o $(T)player_pause.o
-# $(T)scheduler_fxs.o $(T)scheduler_velocities.o $(T)scheduler_pitches.o 
+# $(T)scheduler_fxs.o $(T)scheduler_velocities.o $(T)scheduler_pitches.o
 
 #Disk
 OBJ10= $(T)disk.o $(T)disk_fxs.o $(T)disk_wblock.o $(T)disk_localzooms.o $(T)disk_track.o $(T)disk_fx.o $(T)disk_fxnodelines.o $(T)disk_wtrack.o $(T)disk_temponodes.o $(T)disk_tempos.o $(T)disk_song.o $(T)disk_velocities.o $(T)disk_block.o $(T)disk_placement.o $(T)disk_stops.o $(T)disk_playlist.o $(T)disk_root.o $(T)disk_notes.o $(T)disk_lpbs.o $(T)disk_signatures.o $(T)disk_swing.o $(T)disk_windows.o $(T)disk_warea.o $(T)disk_save.o $(T)disk_load.o $(T)disk_saveload_blocktrack.o $(T)disk_instrument.o $(T)disk_patches.o $(T)disk_slider.o
@@ -750,7 +750,7 @@ OBJ_FAUST=$(T)zita_rev.o $(T)stk_flute.o $(T)stk_bowed.o $(T)stk_blow_bottle.o $
 
 #AUDIO
 OBJ_AUDIO=$(T)audio_instrument.o $(T)SoundProducer.o $(T)AudioBuffer.o $(T)Jack_plugin.o $(T)find_jack_library.o $(T)Faust_plugins.o $(T)Bus_plugins.o $(T)Timeskew_plugin.o $(T)Patchbay_plugin.o $(T)MidiMessages_plugin.o $(T)VST_plugins.o $(T)Ladspa_plugins.o $(T)Sampler_plugin.o $(T)SampleRecorder.o $(T)SampleReader.o $(T)Seqtrack_plugin.o $(T)FluidSynth_plugin.o $(T)Pd_plugin.o $(T)Modulator_plugin.o $(T)SendReceive_plugins.o $(T)SoundPluginRegistry.o $(T)SoundPlugin.o $(T)AudioMeterPeaks.o $(T)Peaks.o $(T)Fade.o $(T)Mixer.o $(T)get_windows_commandlines.o $(T)Envelope.o $(T)Resampler.o $(T)SoundFonts.o $(T)Presets.o $(T)undo_audio_effect.o $(T)undo_connection_enabled.o $(T)undo_audio_connection_gain.o $(T)undo_pd_controllers.o $(T)undo_plugin_state.o $(T)SoundfileSaver.o $(T)system_compressor_wrapper.o $(T)KillJackd.o $(T)SF.o $(T)RIFF.o
- 
+
 #MultiCore.o $(T)Smooth.o
 
 #Mixer
@@ -773,7 +773,7 @@ OBJ = $(OBJ12) $(OBJ_ES) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6) $(OBJ7)
 #-------------------KARSJK-------------------------------
 
 BUILD_DEPENDENCIES = flagopts.opt $(CD)keyboard_sub_ids.h dependencies_ok
-#buildtype.opt 
+#buildtype.opt
 
 PROGRAM_MODULES = $(RADIUM_BIN) bin/radium_crashreporter bin/protoconfparser.py bin/protos.conf bin/radium_error_message bin/radium_progress_window bin/radium_check_jack_status bin/radium_check_opengl bin/radium_plugin_scanner bin/scheme/api_protos.scm
 OBJECT_DEPENDENCIES = $(BUILD_DEPENDENCIES)
@@ -862,7 +862,7 @@ run-gdb:
 # when closing dialogs. (In qt4 it can crash when we open dialogs, now it's when closing dialogs. However, in qt4 it was known why this happened (opengl race condition in qt).)
 
 #./build_linux.sh -j7 && cd bin && G_DEBUG=fatal-criticals QT_FATAL_WARNINGS=1 gdb -e ./radium -x ../gakk
-#	make -j3 && cd bin && G_DEBUG=fatal-criticals QT_FATAL_WARNINGS=1 gdb --args $(PYTHONEXE) start.py keybindings.conf && cd ..          
+#	make -j3 && cd bin && G_DEBUG=fatal-criticals QT_FATAL_WARNINGS=1 gdb --args $(PYTHONEXE) start.py keybindings.conf && cd ..
 
 run-valgrind:
 	echo "Execute first: jackd -s -r -ddummy -r 11000 -p 2048 -w 5000000"
@@ -987,7 +987,7 @@ test_vector:
 	ASAN_OPTIONS="detect_leaks=0,abort_on_error=1" ./a.out
 
 test_placement:
-	$(CC) -g -Wall $(WERROR) -DTEST_PLACEMENT -D__STDC_FORMAT_MACROS=1  -DUSE_QT_REQTYPE=1 common/placement.c common/memory.c -IQt -I$(GCDIR)/include $(GCDIR)/.libs/libgc.a -lpthread -fPIC $(TEST_DEFS) -std=$(STD_C) 
+	$(CC) -g -Wall $(WERROR) -DTEST_PLACEMENT -D__STDC_FORMAT_MACROS=1  -DUSE_QT_REQTYPE=1 common/placement.c common/memory.c -IQt -I$(GCDIR)/include $(GCDIR)/.libs/libgc.a -lpthread -fPIC $(TEST_DEFS) -std=$(STD_C)
 #	gdb ./a.out
 	valgrind --suppressions=valgrind-python.supp --suppressions=Qt47supp.txt --suppressions=libgc.supp --tool=memcheck --leak-check=no --read-var-info=yes --track-origins=yes --fair-sched=yes ./a.out
 
@@ -1042,7 +1042,7 @@ benchmark_smoothdelay:
 	$(CCC) -g -Wall $(WERROR) audio/Fade.cpp $(CPPOPT) -UNDEBUG -fPIC $(TEST_DEFS) -DBENCHMARK_SMOOTHDELAY -O3  $(SMOOTHDELAY_OPTS) -DMARCH_NATIVE_ALLOWED=1 -march=native -ffast-math #-fopt-info-vec-optimized -fopt-info-vec-all
 #-march=native
 
-#-fno-signed-zeros 
+#-fno-signed-zeros
 	$(CCC) test_smoothdelay.o Fade.o $(OS_LDFLAGS2)  -o test_smoothdelay
 	./test_smoothdelay
 	@rm test_smoothdelay
@@ -1050,14 +1050,11 @@ benchmark_smoothdelay:
 packages: bin/packages/deletemetorebuild
 
 bin/packages/deletemetorebuild: bin/packages/build.sh
-	echo "\
-	set -xeEu;\
-	export PYTHONEXE_NOT_AVAILABLE_YET=1;\
-	./check_dependencies.sh test_packages
-	cd bin/packages;\
-	./build.sh this_argument_is_not_used no \
-	" >makescript.sh
-	bash makescript.sh
+	set -xeEu; \
+	export PYTHONEXE_NOT_AVAILABLE_YET=1; \
+	./check_dependencies.sh test_packages; \
+	cd bin/packages; \
+	./build.sh this_argument_is_not_used no
 	@echo
 	@echo "packages successfully built. Now run ./build_linux.sh -j7"
 
@@ -1103,7 +1100,7 @@ $(RADIUM_BIN): $(OBJ) $(MAKEFILE) bin/packages/fluidsynth-1.1.6/src/.libs/libflu
 #	$(LINKER) $(OBJ) $(GCDIR)/.libs/libgc.a -o $(RADIUM_BIN) -g  -lpython2.6 -lpthread $(QTLINKFLAGS) $(LDFLAGS) $(FPIC)
 
 #	$(LINKER) -shared $(OBJ) $(GCDIR)/.libs/libgc.a -o bin/radiummodule.so -g  -lasound -L/home/kjetil/site/lib `pkg-config --libs Qt3Support` -lprofiler
-# -pg 
+# -pg
 #  -lasound
 
 
@@ -1154,16 +1151,16 @@ bin/protos.conf: $(API)protos.conf
 
 #-----------------COMPILING-----------------------------
 
-$(T)windows.o: $(BUILD_DEPENDENCIES) $(CD)windows.c 
+$(T)windows.o: $(BUILD_DEPENDENCIES) $(CD)windows.c
 	$(CC2) $(CD)windows.c $(OPT)
 
-$(T)list.o:  $(BUILD_DEPENDENCIES) $(CD)list.c 
+$(T)list.o:  $(BUILD_DEPENDENCIES) $(CD)list.c
 	$(CC2) $(CD)list.c $(OPT)
 
-$(T)vector.o:  $(BUILD_DEPENDENCIES) $(CD)vector.c 
+$(T)vector.o:  $(BUILD_DEPENDENCIES) $(CD)vector.c
 	$(CC2) $(CD)vector.c $(OPT)
 
-$(T)hashmap.o:  $(BUILD_DEPENDENCIES) $(CD)hashmap.c 
+$(T)hashmap.o:  $(BUILD_DEPENDENCIES) $(CD)hashmap.c
 	$(CC2) $(CD)hashmap.c $(OPT) $(NO_SANITIZE_SIGNED_INTEGER_OVERFLOW)  #-fno-sanitize=undefined
 
 $(T)Dynvec.o:  $(BUILD_DEPENDENCIES) $(CD)Dynvec.c $(CD)dyn_type.h $(CD)nsmtracker.h
@@ -1176,7 +1173,7 @@ $(T)RT_memory_allocator.o: $(BUILD_DEPENDENCIES) $(CD)RT_memory_allocator.cpp
 	$(CCC2) $(CD)RT_memory_allocator.cpp $(CPPOPT) $(BOOST_FLAGS)
 
 
-$(T)song.o:  $(BUILD_DEPENDENCIES) $(CD)song.c 
+$(T)song.o:  $(BUILD_DEPENDENCIES) $(CD)song.c
 	$(CC2) $(CD)song.c $(OPT)
 
 $(T)blocks.o:  $(BUILD_DEPENDENCIES) $(CD)blocks.cpp
@@ -1185,7 +1182,7 @@ $(T)blocks.o:  $(BUILD_DEPENDENCIES) $(CD)blocks.cpp
 $(T)tracks.o:  $(BUILD_DEPENDENCIES) $(CD)tracks.cpp $(CD)TimeData.hpp
 	$(CCC2) $(CD)tracks.cpp $(CPPOPT)
 
-$(T)localzooms.o:  $(BUILD_DEPENDENCIES) $(CD)localzooms.c 
+$(T)localzooms.o:  $(BUILD_DEPENDENCIES) $(CD)localzooms.c
 	$(CC2) $(CD)localzooms.c $(OPT)
 
 $(T)notes.o:  $(BUILD_DEPENDENCIES) $(CD)notes.cpp common/nsmtracker.h common/TimeData.hpp
@@ -1194,16 +1191,16 @@ $(T)notes.o:  $(BUILD_DEPENDENCIES) $(CD)notes.cpp common/nsmtracker.h common/Ti
 $(T)pitches.o:  $(BUILD_DEPENDENCIES) $(CD)pitches.cpp
 	$(CCC2) $(CD)pitches.cpp $(CPPOPT)
 
-$(T)wblocks.o:  $(BUILD_DEPENDENCIES) $(CD)wblocks.c 
+$(T)wblocks.o:  $(BUILD_DEPENDENCIES) $(CD)wblocks.c
 	$(CC2) $(CD)wblocks.c $(OPT)
 
 $(T)wtracks.o:  $(BUILD_DEPENDENCIES) $(CD)wtracks.cpp
 	$(CCC2) $(CD)wtracks.cpp $(CPPOPT)
 
-$(T)sliders.o:  $(BUILD_DEPENDENCIES) $(CD)sliders.c 
+$(T)sliders.o:  $(BUILD_DEPENDENCIES) $(CD)sliders.c
 	$(CC2) $(CD)sliders.c $(OPT)
 
-$(T)common.o:  $(BUILD_DEPENDENCIES) $(CD)common.c 
+$(T)common.o:  $(BUILD_DEPENDENCIES) $(CD)common.c
 	$(CC2) $(CD)common.c $(OPT)
 
 $(T)eventreciever.o:  $(BUILD_DEPENDENCIES) $(CD)eventreciever.c
@@ -1249,7 +1246,7 @@ $(T)data_as_text.o:  $(BUILD_DEPENDENCIES) $(CD)data_as_text.c
 	$(CC2) $(CD)data_as_text.c $(OPT)
 
 $(T)debug.o:  $(BUILD_DEPENDENCIES) $(CD)debug.c
-	$(CC2) $(CD)debug.c $(OPT) 
+	$(CC2) $(CD)debug.c $(OPT)
 
 $(T)memory.o:  $(BUILD_DEPENDENCIES) $(CD)memory.c
 	$(CC2) $(CD)memory.c $(OPT)
@@ -1336,7 +1333,7 @@ ifdef USING_GCC
 	 SEQBLOCK_STRETCHSPEED_OPT += -Wno-maybe-uninitialized
 endif
 
-$(T)seqblock_stretchspeed.o:  $(BUILD_DEPENDENCIES) $(CD)seqblock_stretchspeed.cpp $(CD)SeqAutomation.hpp 
+$(T)seqblock_stretchspeed.o:  $(BUILD_DEPENDENCIES) $(CD)seqblock_stretchspeed.cpp $(CD)SeqAutomation.hpp
 	$(CCC2) $(CD)seqblock_stretchspeed.cpp $(QTOPT) $(SEQBLOCK_STRETCHSPEED_OPT)
 
 $(T)time.o:  $(BUILD_DEPENDENCIES) $(CD)time.cpp common/time_proc.h
@@ -1349,7 +1346,7 @@ $(T)reltempo.o:  $(BUILD_DEPENDENCIES) $(CD)reltempo.c
 #player source-files.
 
 $(T)Ptask2Mtask.o:  $(BUILD_DEPENDENCIES) $(CD)Ptask2Mtask.c $(CD)playerclass.h
-	$(CC2) $(CD)Ptask2Mtask.c $(OPT) 
+	$(CC2) $(CD)Ptask2Mtask.c $(OPT)
 
 $(T)player.o:  $(BUILD_DEPENDENCIES) $(CD)player.c $(CD)playerclass.h $(CD)scheduler_proc.h
 	$(CC2) $(CD)player.c $(OPT) #-fno-sanitize=undefined
@@ -1687,19 +1684,19 @@ $(T)stacktoucher.o: $(CD)stacktoucher.c
 	$(CC2) $(O0) $(CD)stacktoucher.c -c $(O0) -std=c99 -g -Wall $(WERROR)
 
 
-$(T)X11_Main.o:  $(BUILD_DEPENDENCIES) $(P)X11_Main.c 
+$(T)X11_Main.o:  $(BUILD_DEPENDENCIES) $(P)X11_Main.c
 	$(CC2) $(P)X11_Main.c $(OPT)
 
-$(T)X11_visual.o:  $(BUILD_DEPENDENCIES) $(P)X11_visual.c 
-	$(CC2) $(P)X11_visual.c $(OPT) 
+$(T)X11_visual.o:  $(BUILD_DEPENDENCIES) $(P)X11_visual.c
+	$(CC2) $(P)X11_visual.c $(OPT)
 
-$(T)X11_error.o:  $(BUILD_DEPENDENCIES) X11/X11_error.c 
+$(T)X11_error.o:  $(BUILD_DEPENDENCIES) X11/X11_error.c
 	$(CC2) X11/X11_error.c $(OPT)
 
-$(T)W_Error.o:  $(BUILD_DEPENDENCIES) windows/W_Error.c 
+$(T)W_Error.o:  $(BUILD_DEPENDENCIES) windows/W_Error.c
 	$(CC2) windows/W_Error.c $(OPT)
 
-$(T)W_Keyboard.o:  $(BUILD_DEPENDENCIES) windows/W_Keyboard.c 
+$(T)W_Keyboard.o:  $(BUILD_DEPENDENCIES) windows/W_Keyboard.c
 	$(CC2) windows/W_Keyboard.c $(OPT)
 
 $(T)cocoa_Keyboard.o:  $(BUILD_DEPENDENCIES) macosx/cocoa_Keyboard.mm
@@ -1708,22 +1705,22 @@ $(T)cocoa_Keyboard.o:  $(BUILD_DEPENDENCIES) macosx/cocoa_Keyboard.mm
 $(T)machthreads.o:  $(BUILD_DEPENDENCIES) macosx/machthreads.mm
 	$(CLANGPLUSPLUS2) macosx/machthreads.mm $(OBJC_OPT)
 
-$(T)X11_Ptask2Mtask.o:  $(BUILD_DEPENDENCIES) X11/X11_Ptask2Mtask.c 
+$(T)X11_Ptask2Mtask.o:  $(BUILD_DEPENDENCIES) X11/X11_Ptask2Mtask.c
 	$(CC2) X11/X11_Ptask2Mtask.c $(OPT)
 
 $(T)X11_Bs_edit.o:  $(BUILD_DEPENDENCIES) X11/X11_Bs_edit.c
 	$(CC2) X11/X11_Bs_edit.c $(OPT)
 
-$(T)X11_endprogram.o:  $(BUILD_DEPENDENCIES) $(P)X11_endprogram.c 
+$(T)X11_endprogram.o:  $(BUILD_DEPENDENCIES) $(P)X11_endprogram.c
 	$(CC2) $(P)X11_endprogram.c $(OPT)
 
-$(T)X11_disk.o:  $(BUILD_DEPENDENCIES) X11/X11_disk.c 
+$(T)X11_disk.o:  $(BUILD_DEPENDENCIES) X11/X11_disk.c
 	$(CC2) X11/X11_disk.c $(OPT)
 
-$(T)posix_Player.o:  $(BUILD_DEPENDENCIES) posix/posix_Player.c 
+$(T)posix_Player.o:  $(BUILD_DEPENDENCIES) posix/posix_Player.c
 	$(CC2) posix/posix_Player.c $(OPT)
 
-$(T)X11_ReqType.o:  $(BUILD_DEPENDENCIES) X11/X11_ReqType.c 
+$(T)X11_ReqType.o:  $(BUILD_DEPENDENCIES) X11/X11_ReqType.c
 	$(CC2) X11/X11_ReqType.c $(OPT)
 
 $(T)X11_instrument.o:  $(BUILD_DEPENDENCIES) X11/X11_instrument.c
@@ -1736,7 +1733,7 @@ bin/radium_check_recent_libxcb: X11/check_recent_libxcb.c
 	$(CC) -Wall $(WERROR) X11/check_recent_libxcb.c -ldl -o bin/radium_check_recent_libxcb
 
 #X11_MidiProperties.o:  $(BUILD_DEPENDENCIES) X11/X11_MidiProperties.c
-#	$(CC2) X11/X11_MidiProperties.c $(OPT) 
+#	$(CC2) X11/X11_MidiProperties.c $(OPT)
 
 #X11_ClientMessages.o:  $(BUILD_DEPENDENCIES) X11/X11_ClientMessages.c
 #	$(CC2) X11/X11_ClientMessages.c $(OPT)
@@ -1746,7 +1743,7 @@ $(P)EditorWidget.h: $(BUILD_DEPENDENCIES)
 $(T)Qt_Main.o:  $(BUILD_DEPENDENCIES) $(P)Qt_Main.cpp $(P)EditorWidget.h $(P)Qt_instruments_proc.h $(QM)QM_MixerWidget.h Qt/helpers.h audio/SampleRecorder_proc.h common/nag.h Qt/KeyboardFocusFrame.hpp common/Process.hpp Qt/Timer.hpp
 	$(MOC) Qt/Qt_Main.cpp > Qt/mQt_Main.cpp
 	cd Qt && $(MOC) -DFOR_LINUX Timer.hpp > mTimer.hpp
-	$(CCC2) $(P)Qt_Main.cpp $(QTOPT) $(SNDFILEOPT) $(BOOST_INCLUDE)  -DRADIUM_VERSION=\"$(RADIUM_VERSION)\" -Wno-null-dereference  # -Wno-deprecated-declarations -Wno-shadow 
+	$(CCC2) $(P)Qt_Main.cpp $(QTOPT) $(SNDFILEOPT) $(BOOST_INCLUDE)  -DRADIUM_VERSION=\"$(RADIUM_VERSION)\" -Wno-null-dereference  # -Wno-deprecated-declarations -Wno-shadow
 
 $(T)Qt_SaveRestoreWindows.o:  $(BUILD_DEPENDENCIES) Qt/Qt_SaveRestoreWindows.cpp
 	$(CCC2) $(P)Qt_SaveRestoreWindows.cpp $(QTOPT)
@@ -1760,7 +1757,7 @@ $(T)Qt_visual.o:  $(BUILD_DEPENDENCIES) $(P)Qt_visual.cpp $(P)EditorWidget.h
 $(T)GTK_visual.o:  $(BUILD_DEPENDENCIES) GTK/GTK_visual.c
 	$(CC2) GTK/GTK_visual.c $(OPT) $(GTK_CFLAGS)
 
-$(T)GTK_ReqType.o:  $(BUILD_DEPENDENCIES) GTK/GTK_ReqType.c 
+$(T)GTK_ReqType.o:  $(BUILD_DEPENDENCIES) GTK/GTK_ReqType.c
 	$(CC2) GTK/GTK_ReqType.c $(OPT) $(GTK_CFLAGS)
 
 $(T)GTK_PopupMenu.o:  $(BUILD_DEPENDENCIES) GTK/GTK_PopupMenu.c
@@ -1810,7 +1807,7 @@ $(T)Qt_Time.o:  $(BUILD_DEPENDENCIES) $(P)Qt_Time.cpp
 	$(CCC2) $(P)Qt_Time.cpp $(QTOPT)
 
 $(T)Qt_sequencer.o:  $(BUILD_DEPENDENCIES) $(P)Qt_sequencer.cpp Qt/helpers.h audio/Envelope.hpp audio/Peaks.hpp common/seqblock_automation_proc.h Qt/KeyboardFocusFrame.hpp Qt/Qt_MyQCheckBox.h
-	$(CCC2) $(P)Qt_sequencer.cpp $(QTOPT) $(SNDFILEOPT) $(WNO_DUPLICATED_BRANCHES) $(BOOST_INCLUDE) 
+	$(CCC2) $(P)Qt_sequencer.cpp $(QTOPT) $(SNDFILEOPT) $(WNO_DUPLICATED_BRANCHES) $(BOOST_INCLUDE)
 
 #QD = /home/kjetil/site/src/qt-x11-free-3.3.8b/src/dialogs/
 QD = $(P)
@@ -2019,7 +2016,7 @@ bin/radium_error_message: $(P)Qt_Error.cpp $(P)EditorWidget.h
 
 bin/radium_progress_window: $(P)Qt_progresswindow.cpp
 	$(CCC) -Wall $(WERROR) $(P)Qt_progresswindow.cpp $(CPPOPT) $(QT_CFLAGS) $(OS_OPTS) -DP_CLIENT $(QT_GUI_CFLAGS) -o radium_progress_window.o
-	$(LINKER) `cat buildtype.opt` radium_progress_window.o -o bin/radium_progress_window $(QT_GUI_LDFLAGS)  
+	$(LINKER) `cat buildtype.opt` radium_progress_window.o -o bin/radium_progress_window $(QT_GUI_LDFLAGS)
 	rm radium_progress_window.o
 
 bin/radium_check_jack_status: audio/KillJackd.cpp $(T)Jack_plugin.o $(T)find_jack_library.o # Jack_plugin.o depends on all the weakjack things
@@ -2067,7 +2064,7 @@ $(T)scroll.o:  $(BUILD_DEPENDENCIES) $(CD)scroll.c
 $(T)pixmap.o:  $(BUILD_DEPENDENCIES)  $(CD)pixmap.c
 	$(CC2)  $(CD)pixmap.c $(OPT)
 
-$(T)X11_memory.o:  $(BUILD_DEPENDENCIES)  $(P)X11_memory.c 
+$(T)X11_memory.o:  $(BUILD_DEPENDENCIES)  $(P)X11_memory.c
 	$(CC2)  $(P)X11_memory.c $(OPT)
 
 $(T)gfx_shrink.o:  $(BUILD_DEPENDENCIES)  $(CD)gfx_shrink.c
@@ -2108,7 +2105,7 @@ $(T)api_keyplayedit.o:  $(BUILD_DEPENDENCIES)  $(API)api_keyplayedit.cpp
 $(T)api_navigate.o:  $(BUILD_DEPENDENCIES)  $(API)api_navigate.cpp
 	$(CCC2)  $(API)api_navigate.cpp $(CPPOPT)
 
-$(T)api_disk.o:  $(BUILD_DEPENDENCIES)  $(API)api_disk.cpp 
+$(T)api_disk.o:  $(BUILD_DEPENDENCIES)  $(API)api_disk.cpp
 	$(CCC2)  $(API)api_disk.cpp $(SNDFILEOPT) $(QTOPT)
 
 $(T)api_noteedit.o:  $(BUILD_DEPENDENCIES)  $(API)api_noteedit.cpp common/TimeData.hpp
@@ -2117,16 +2114,16 @@ $(T)api_noteedit.o:  $(BUILD_DEPENDENCIES)  $(API)api_noteedit.cpp common/TimeDa
 $(T)api_velocities.o:  $(BUILD_DEPENDENCIES)  $(API)api_velocities.cpp
 	$(CCC2)  $(API)api_velocities.cpp $(CPPOPT)
 
-$(T)api_pitches.o:  $(BUILD_DEPENDENCIES)  $(API)api_pitches.cpp 
+$(T)api_pitches.o:  $(BUILD_DEPENDENCIES)  $(API)api_pitches.cpp
 	$(CCC2)  $(API)api_pitches.cpp $(CPPOPT)
 
 $(T)api_timing.o:  $(BUILD_DEPENDENCIES)  $(API)api_timing.cpp
 	$(CCC2)  $(API)api_timing.cpp $(QTOPT)
 
-$(T)api_trackonoff.o:  $(BUILD_DEPENDENCIES)  $(API)api_trackonoff.c 
+$(T)api_trackonoff.o:  $(BUILD_DEPENDENCIES)  $(API)api_trackonoff.c
 	$(CC2)  $(API)api_trackonoff.c $(OPT)
 
-$(T)api_zoom.o:  $(BUILD_DEPENDENCIES)  $(API)api_zoom.cpp Qt/KeyboardFocusFrame.hpp 
+$(T)api_zoom.o:  $(BUILD_DEPENDENCIES)  $(API)api_zoom.cpp Qt/KeyboardFocusFrame.hpp
 	$(CCC2)  $(API)api_zoom.cpp $(QTOPT)
 
 $(T)api_notemanipulate.o:  $(BUILD_DEPENDENCIES)  $(API)api_notemanipulate.cpp
@@ -2162,7 +2159,7 @@ $(P)EditorWidget.h: Qt/KeyboardFocusFrame.hpp
 
 
 
-$(T)api_requesters.o:  $(BUILD_DEPENDENCIES)  $(API)api_requesters.cpp 
+$(T)api_requesters.o:  $(BUILD_DEPENDENCIES)  $(API)api_requesters.cpp
 	$(CCC2)  $(API)api_requesters.cpp $(QTOPT)
 
 $(T)api_mouse.o:  $(BUILD_DEPENDENCIES)  $(API)api_mouse.cpp common/Beats_proc.h
@@ -2187,7 +2184,7 @@ ifdef USING_GCC
 	NOUNUSEDBUTSETVARIABLEWARNING += -Wno-unused-but-set-variable -Wno-cast-function-type
 endif
 
-$(T)radium_wrap.o:  $(BUILD_DEPENDENCIES)  $(API)radium_wrap.c 
+$(T)radium_wrap.o:  $(BUILD_DEPENDENCIES)  $(API)radium_wrap.c
 	$(CC2) $(API)radium_wrap.c $(OPT) -Wno-unused-function $(NOUNUSEDBUTSETVARIABLEWARNING) -Wno-missing-field-initializers -Wno-write-strings -Wno-cast-function-type-mismatch
 
 $(API)radium_wrap.c: $(BUILD_DEPENDENCIES) $(API)protos.conf bin/protoconfparser.py $(API)/radium_wrap/radium_wrap_1.c $(API)/radium_wrap/radium_wrap_3.c $(API)makeradiumwrap_c.sh $(API)makeradiumwrap_c.sh
@@ -2226,30 +2223,30 @@ $(T)gfx_request.o:  $(BUILD_DEPENDENCIES)  $(CD)gfx_request.c
 
 
 $(T)midi_playfromstart.o:  $(BUILD_DEPENDENCIES)  midi/midi_playfromstart.c
-	$(CC2)  midi/midi_playfromstart.c $(OPT) 
+	$(CC2)  midi/midi_playfromstart.c $(OPT)
 $(T)midi_instrument.o:  $(BUILD_DEPENDENCIES)  midi/midi_instrument.cpp
-	$(CCC2)  midi/midi_instrument.cpp $(CPPOPT) 
+	$(CCC2)  midi/midi_instrument.cpp $(CPPOPT)
 $(T)midi_i_input.o:  $(BUILD_DEPENDENCIES)  midi/midi_i_input.cpp  midi/midi_i_input_proc.h common/Vector.hpp
-	$(CCC2)  midi/midi_i_input.cpp $(QTOPT) $(JACKOPT) $(BOOST_INCLUDE) 
+	$(CCC2)  midi/midi_i_input.cpp $(QTOPT) $(JACKOPT) $(BOOST_INCLUDE)
 $(T)midi_fx.o:  $(BUILD_DEPENDENCIES)  midi/midi_fx.cpp
-	$(CCC2)  midi/midi_fx.cpp $(CPPOPT) 
+	$(CCC2)  midi/midi_fx.cpp $(CPPOPT)
 
 #disk_midi_mymidilinks.o:  $(BUILD_DEPENDENCIES)  midi/disk_midi_mymidilinks.c
-#	$(CC2)  midi/disk_midi_mymidilinks.c $(OPT) 
+#	$(CC2)  midi/disk_midi_mymidilinks.c $(OPT)
 # TODO
 
 $(T)disk_midi_instrument.o:  $(BUILD_DEPENDENCIES)  midi/disk_midi_instrument.c $(CD)disk.h
-	$(CC2)  midi/disk_midi_instrument.c $(OPT) 
+	$(CC2)  midi/disk_midi_instrument.c $(OPT)
 $(T)disk_midi_fx.o:  $(BUILD_DEPENDENCIES)  midi/disk_midi_fx.cpp $(CD)disk.h
-	$(CCC2)  midi/disk_midi_fx.cpp $(QTOPT) 
+	$(CCC2)  midi/disk_midi_fx.cpp $(QTOPT)
 #$(T)alsaseq_midi.o:  $(BUILD_DEPENDENCIES)  midi/alsaseq/alsaseq_midi.c
-#	$(CC2)  midi/alsaseq/alsaseq_midi.c $(OPT) 
+#	$(CC2)  midi/alsaseq/alsaseq_midi.c $(OPT)
 #midi_getEvents.o:  $(BUILD_DEPENDENCIES)  midi/midi_getEvents.c
-#	$(CC2)  midi/midi_getEvents.c $(OPT) 
+#	$(CC2)  midi/midi_getEvents.c $(OPT)
 #$(T)midi_menues.o:  $(BUILD_DEPENDENCIES)  midi/midi_menues.c
-#	$(CC2)  midi/midi_menues.c $(OPT) 
+#	$(CC2)  midi/midi_menues.c $(OPT)
 $(T)midi_ports.o: $(BUILD_DEPENDENCIES) midi/midi_ports.cpp
-	$(CCC2) midi/midi_ports.cpp $(QTOPT) 
+	$(CCC2) midi/midi_ports.cpp $(QTOPT)
 
 
 
@@ -2285,10 +2282,10 @@ bin/X11_XSendEvent: X11/X11_XSendEvent.c
 
 $(QM)QM_view.cpp: $(QM)mQM_view.cpp
 
-$(QM)mQM_view.cpp: $(QM)QM_view.h 
+$(QM)mQM_view.cpp: $(QM)QM_view.h
 	cd $(QM) && $(MOC) QM_view.h >mQM_view.cpp
 
-$(QM)mQM_MixerWidget.cpp: $(QM)QM_MixerWidget.h $(QM)QM_MixerWidget.cpp $(P)Qt_MyQButton.h 
+$(QM)mQM_MixerWidget.cpp: $(QM)QM_MixerWidget.h $(QM)QM_MixerWidget.cpp $(P)Qt_MyQButton.h
 	cd $(QM) && $(MOC) QM_MixerWidget.cpp >mQM_MixerWidget.cpp
 
 #images.o: $(QM)images.qrc
@@ -2345,16 +2342,16 @@ $(T)Ladspa_plugins.o: audio/Ladspa_plugins.cpp
 	$(CCC2) audio/Ladspa_plugins.cpp $(QTOPT) $(LRDFOPT)
 
 $(T)Sampler_plugin.o: audio/Sampler_plugin.cpp audio/Sampler_plugin_wav_parse.c audio/Sampler_plugin_xi_load.c audio/Sampler_plugin_sf2_load.c audio/SoundFonts_proc.h audio/Peaks.hpp audio/SampleRecorder_proc.h common/OS_string_proc.h audio/Granulator.hpp  audio/GranResampler.hpp audio/Fade.hpp
-	$(CCC2) $(QTOPT) audio/Sampler_plugin.cpp $(SNDFILEOPT) $(SAMPLERATEOPT) $(OPTIMIZE_O3) $(NO_ANALYZER) $(BOOST_INCLUDE) $(MAYBE_OMIT_FRAME_POINTERS) #  $(CPUOPT) 
+	$(CCC2) $(QTOPT) audio/Sampler_plugin.cpp $(SNDFILEOPT) $(SAMPLERATEOPT) $(OPTIMIZE_O3) $(NO_ANALYZER) $(BOOST_INCLUDE) $(MAYBE_OMIT_FRAME_POINTERS) #  $(CPUOPT)
 
 $(T)SampleRecorder.o: audio/SampleRecorder.cpp audio/SampleRecorder_proc.h common/OS_string_proc.h
-	$(CCC2) $(QTOPT) audio/SampleRecorder.cpp $(SNDFILEOPT) $(BOOST_INCLUDE) 
+	$(CCC2) $(QTOPT) audio/SampleRecorder.cpp $(SNDFILEOPT) $(BOOST_INCLUDE)
 
 $(T)SampleReader.o: audio/SampleReader.cpp audio/SampleReader_proc.h
-	$(CCC2) $(QTOPT) audio/SampleReader.cpp $(SNDFILEOPT) $(BOOST_INCLUDE) 
+	$(CCC2) $(QTOPT) audio/SampleReader.cpp $(SNDFILEOPT) $(BOOST_INCLUDE)
 
 $(T)Seqtrack_plugin.o: audio/Seqtrack_plugin.cpp audio/SampleReader_proc.h audio/GranResampler.hpp audio/Granulator.hpp common/Random.hpp audio/Peaks.hpp audio/SampleRecorder_proc.h common/seqblock_automation_proc.h audio/Fade.hpp
-	$(CCC2) $(QTOPT) audio/Seqtrack_plugin.cpp $(SNDFILEOPT) $(OPTIMIZE_O3) $(NO_ANALYZER_MALLOC_LEAK) $(BOOST_INCLUDE) $(MAYBE_OMIT_FRAME_POINTERS) # $(CPUOPT) 
+	$(CCC2) $(QTOPT) audio/Seqtrack_plugin.cpp $(SNDFILEOPT) $(OPTIMIZE_O3) $(NO_ANALYZER_MALLOC_LEAK) $(BOOST_INCLUDE) $(MAYBE_OMIT_FRAME_POINTERS) # $(CPUOPT)
 
 $(T)FluidSynth_plugin.o: audio/FluidSynth_plugin.cpp
 	$(CCC2) $(CPPOPT) $(CPUOPT) audio/FluidSynth_plugin.cpp #-Wno-gnu-designator
@@ -2381,7 +2378,7 @@ FAUST_OPTS1 = $(QTOPT) $(WNO_SUGGEST_OVERRIDE) -Wno-overloaded-virtual $(NO_SANI
 FAUST_OPTS = $(FAUST_OPTS1) -I$(FAUSTDIR)/architecture
 FAUST_OPTS2 = $(FAUST_OPTS) -Wno-float-equal
 #-Wno-extern-c-compat
-# -Ibin/packages/faust2/architecture 
+# -Ibin/packages/faust2/architecture
 FAUST_BIN_OPTS = -nvi
 
 ifdef USING_CLANG
@@ -2606,7 +2603,7 @@ $(T)faust_tapiir.o: audio/faust_tapiir.cpp
 	@echo "Changed (audio/tapiir.o):"
 	@echo $?
 	@echo
-	$(CCC2) audio/faust_tapiir.cpp $(FAUST_OPTS2) -DCLASSNAME=Tapiir_dsp -DDSP_NAME=\"Tapiir\" -DCREATE_NAME=create_faust_tapiir_plugin 
+	$(CCC2) audio/faust_tapiir.cpp $(FAUST_OPTS2) -DCLASSNAME=Tapiir_dsp -DDSP_NAME=\"Tapiir\" -DCREATE_NAME=create_faust_tapiir_plugin
 
 audio/faust_tapiir.cpp: audio/faust-examples/tapiir.dsp $(FAUST_DEPENDENCIES)
 	cd audio/faust-examples && $(FAUST) $(FAUST_BIN_OPTS) -cn Tapiir_dsp -a ../Faust_plugins_template.cpp tapiir.dsp -o ../faust_tapiir.cpp
@@ -2702,7 +2699,7 @@ audio/faust_system_highshelf.cpp: audio/system_highshelf.dsp $(FAUST_DEPENDENCIE
 
 $(T)SoundProducer.o: audio/SoundProducer.cpp audio/SoundProducer_proc.h audio/fade_envelopes.h audio/MultiCore.cpp audio/monotonic_timer.c common/sema.h common/Semaphores.hpp common/QueueStack.hpp audio/SmoothDelay.hpp common/Vector.hpp common/spinlock.h audio/CpuUsage.hpp audio/AudioBuffer.hpp audio/AudioMeterPeaks_proc.h common/threading.h
 	$(MOC) audio/MultiCore.cpp >audio/mMultiCore.cpp
-	$(CCC2) audio/SoundProducer.cpp $(JACKOPT) $(QTOPT) $(OPTIMIZE_O3) $(CPUOPT) $(NO_ANALYZER_MALLOC_LEAK) $(BOOST_INCLUDE) $(MAYBE_OMIT_FRAME_POINTERS) # -O3 # 
+	$(CCC2) audio/SoundProducer.cpp $(JACKOPT) $(QTOPT) $(OPTIMIZE_O3) $(CPUOPT) $(NO_ANALYZER_MALLOC_LEAK) $(BOOST_INCLUDE) $(MAYBE_OMIT_FRAME_POINTERS) # -O3 #
 #-fno-tree-vectorize # tree-vectorize makes radium crash on windows 8 with gcc 4.7.2
 
 #-finline-functions -funswitch-loops -fvect-cost-model -fipa-cp-clone  -fpredictive-commoning -fgcse-after-reload
@@ -2742,7 +2739,7 @@ $(T)Envelope.o: audio/Envelope.cpp
 
 $(T)Resampler.o: audio/Resampler.cpp audio/SampleInterpolator.cpp
 #	$(CCC2) audio/Resampler.cpp $(CPPOPT) `$(PKG) --cflags samplerate`
-	$(CCC2) audio/Resampler.cpp $(CPPOPT) $(CPUOPT) `$(PKG) --cflags samplerate` 
+	$(CCC2) audio/Resampler.cpp $(CPPOPT) $(CPUOPT) `$(PKG) --cflags samplerate`
 
 $(T)SoundFonts.o: audio/SoundFonts.cpp $(LIBGIG_PATH)/SF.cpp
 	$(CCC2) audio/SoundFonts.cpp $(QTOPT) -Ibin/packages/libgig/src/
@@ -2823,13 +2820,13 @@ $(T)GfxElements.o: OpenGL/GfxElements.cpp OpenGL/TextBitmaps.hpp OpenGL/GfxEleme
 	$(CCC2) OpenGL/GfxElements.cpp $(QTOPT) $(FREETYPE_CFLAGS) $(BOOST_INCLUDE) $(VL_CFLAGS) $(VISUALIZATION_OPTIONS)
 
 $(T)T2.o: OpenGL/T2.cpp OpenGL/T2.hpp OpenGL/SharedVariables.hpp common/QueueStack.hpp OpenGL/GfxElements.h
-	$(CCC2) OpenGL/T2.cpp $(QTOPT) $(BOOST_INCLUDE) $(VL_CFLAGS) $(VISUALIZATION_OPTIONS) 
+	$(CCC2) OpenGL/T2.cpp $(QTOPT) $(BOOST_INCLUDE) $(VL_CFLAGS) $(VISUALIZATION_OPTIONS)
 
 $(T)Render.o: OpenGL/Render.cpp OpenGL/TextBitmaps.hpp OpenGL/GfxElements.h OpenGL/SharedVariables.hpp common/spinlock.h common/time_proc.h common/Beats_proc.h common/TimeData.hpp
 	$(CCC2) OpenGL/Render.cpp $(QTOPT) $(VL_CFLAGS) $(VISUALIZATION_OPTIONS)
 
 $(T)Widget.o: OpenGL/Widget.cpp OpenGL/TextBitmaps.hpp OpenGL/GfxElements.h OpenGL/Timing.hpp OpenGL/SharedVariables.hpp common/Mutex.hpp OpenGL/T2.hpp common/spinlock.h common/MovingAverage.hpp OpenGL/Qt5ThreadedWidget.hpp common/Vector.hpp Qt/Timer.hpp
-	$(CCC2) OpenGL/Widget.cpp $(QTOPT) $(VL_CFLAGS) $(VISUALIZATION_OPTIONS) 
+	$(CCC2) OpenGL/Widget.cpp $(QTOPT) $(VL_CFLAGS) $(VISUALIZATION_OPTIONS)
 
 $(T)CheckOpenGL.o: OpenGL/CheckOpenGL.cpp common/Process.hpp
 	$(CCC2) OpenGL/CheckOpenGL.cpp $(QTOPT) $(WNO_DEPRECATED_DECLARATIONS)
@@ -2911,7 +2908,7 @@ bin/packages/sndlib/clm.c: bin/packages/sndlib.tar.gz bin/packages/sndlib.patch
 
 
 $(T)s7webserver.o: bin/s7webserver/s7webserver.h bin/s7webserver/s7webserver.cpp bin/s7webserver/moc_s7webserver.cpp bin/packages/s7/s7.c
-	$(CCC2) -c bin/s7webserver/s7webserver.cpp $(QTOPT) -Ibin/packages/s7 -g -Iembedded_scheme -Wall $(WERROR) -Wno-error=unused-variable -Wno-error=unused-function $(STD_CPP) -Wno-deprecated-declarations 
+	$(CCC2) -c bin/s7webserver/s7webserver.cpp $(QTOPT) -Ibin/packages/s7 -g -Iembedded_scheme -Wall $(WERROR) -Wno-error=unused-variable -Wno-error=unused-function $(STD_CPP) -Wno-deprecated-declarations
 
 bin/s7webserver/moc_s7webserver.cpp: bin/s7webserver/s7webserver.h
 	$(MOC) -DCOMPILING_S7WEBSERVER bin/s7webserver/s7webserver.h -o bin/s7webserver/moc_s7webserver.cpp
@@ -2965,7 +2962,7 @@ $(T)SF.o: $(LIBGIG_PATH)/SF.cpp
 $(LIBGIG_PATH)/SF.cpp: bin/packages/libgig-4.5.1.tar.bz2
 	cd bin/packages && rm -fr libgig && tar xvjf libgig-4.5.1.tar.bz2 && mv libgig-4.5.1 libgig && touch $(LIBGIG_PATH)/SF.cpp && patch -p0 <libgig_win32.patch && patch -p0 <libgig_dont_check_loops.patch && echo "#define VER_STRING \"4.5.1\"" >$(LIBGIG_PATH)/../win32/libgig_private.h
 
-$(T)radium_s7_wrap.o: api/radium_s7_wrap.c 
+$(T)radium_s7_wrap.o: api/radium_s7_wrap.c
 	$(CC2) api/radium_s7_wrap.c $(OPT) -Ibin/packages/s7
 
 api/radium_s7_wrap.c: bin/protoconfparser.py api/protos.conf bin/packages/s7/s7.c api/s7_types_code.c api/s7_types_code_init.c
@@ -2977,12 +2974,9 @@ api/s7_types_code.c: api/s7_types_generator.scm
 api/s7_types_code_init.c: api/s7_types_generator.scm
 	api/s7_types_generator.scm init
 
-bin/scheme/api_protos.scm: bin/protos.conf bin/protoconfparser.py 
+bin/scheme/api_protos.scm: bin/protos.conf bin/protoconfparser.py
 	cd api && $(PYTHONEXE) ../bin/protoconfparser.py api_protos.scm >../bin/scheme/api_protos.scm
 
 #bin/zita_rev_ladspa.so: audio/zita_rev.dsp
 #	cd audio && $(FAUST) $(FAUST_BIN_OPTS) -a ladspa.cpp -cn zita_rev_radium zita_rev.dsp >zita_rev_ladspa.cpp
-#	$(CCC2) -I /usr/share/faust/ audio/zita_rev_ladspa.cpp -shared -o bin/zita_rev_ladspa.so $(FPIC) 
-
-
-
+#	$(CCC2) -I /usr/share/faust/ audio/zita_rev_ladspa.cpp -shared -o bin/zita_rev_ladspa.so $(FPIC)

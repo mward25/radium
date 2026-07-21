@@ -45,7 +45,7 @@ fi
 #export INCLUDE_PDDEV="jadda"
 
 
-if arch |grep -e arm -e aarch64 ; then
+if machine_arch |grep -e arm -e aarch64 ; then
   export CPUOPTS=""
 else
   export CPUOPTS="-msse2 -mfpmath=sse"
@@ -67,13 +67,13 @@ export MAYBE_OMIT_FRAME_POINTERS=""
 if [[ $BUILDTYPE == RELEASE ]] ; then
 	export MAYBE_OMIT_FRAME_POINTERS="-DRADIUM_OMIT_FRAME_POINTERS=1 -fno-omit-frame-pointer"
 fi
-	
-	
+
+
 export OS_DEBUG_BUILD_OPTS=""
 #export OS_DEBUG_BUILD_OPTS="-fomit-frame-pointer"
 
 
-# -flto 
+# -flto
 #fi
 
 export CPUOPT=
@@ -82,7 +82,7 @@ export CPUOPT=
 
 # To compile llvm/clang/sanitizers: (Note: sometimes rtti is not needed, but it seems coincidental when it's necessary):
 # export GCC_PREFIX=$(dirname `which gcc`)/../
-# REQUIRES_RTTI=1 cmake -DLLVM_ENABLE_PROJECTS="clang;compiler-rt" -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$GCC_PREFIX/bin/gcc -DCMAKE_CXX_COMPILER=$GCC_PREFIX/bin/g++ -DGCC_INSTALL_PREFIX=$GCC_PREFIX -DCMAKE_INSTALL_PREFIX=/home/kjetil/site -DLLVM_ENABLE_RTTI=ON ../llvm 
+# REQUIRES_RTTI=1 cmake -DLLVM_ENABLE_PROJECTS="clang;compiler-rt" -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$GCC_PREFIX/bin/gcc -DCMAKE_CXX_COMPILER=$GCC_PREFIX/bin/g++ -DGCC_INSTALL_PREFIX=$GCC_PREFIX -DCMAKE_INSTALL_PREFIX=/home/kjetil/site -DLLVM_ENABLE_RTTI=ON ../llvm
 # REQUIRES_RTTI=1 make REQUIRES_RTTI=1 -j2
 
 branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
@@ -99,14 +99,14 @@ if [[ $RADIUM_USE_CLANG == 1 ]] ; then
 
     # ldd
     export LINKER="clang++"
-    
+
     if [[ $BUILDTYPE != RELEASE ]] ; then
         # both mold and ldd
         RADIUM_USES_MOLD_OR_LDD=1
 
         # mold: (probably faster than ldd if having more than 2 cores)
         #export LINKER="$LINKER -fuse-ld=/home/kjetil/mold/mold"
-        #RADIUM_USES_MOLD_PRELOAD=0 # set to 1 to speed up linking if having more than 2 cores.    
+        #RADIUM_USES_MOLD_PRELOAD=0 # set to 1 to speed up linking if having more than 2 cores.
 
         # ldd:
         export LINKER="$LINKER -lsframe -fuse-ld=lld"
@@ -114,7 +114,7 @@ if [[ $RADIUM_USE_CLANG == 1 ]] ; then
         # stuff
         export LINKER="$LINKER -lgcc_s --rtlib=compiler-rt /usr/lib64/libatomic.so.1"
     fi
-    
+
 else
     export CCC="g++ $CPUOPTS "
     export CC="gcc $CPUOPTS "
@@ -122,7 +122,7 @@ else
 
     export STD_CPP="-std=gnu++17"
     export USE_STD_COUNTING_SEMAPHORE=0 # for now, the gcc implementation of std::counting_semaphore doesn't seem to have been tested very much.
-    
+
     # Use the ldd linker instead. It's approx. 10x faster.
     if [[ $BUILDTYPE != RELEASE ]] ; then
         RADIUM_USES_MOLD_OR_LDD=1
@@ -169,7 +169,7 @@ export VL_LIBS="$VL_PATH/src/vlVG/lib/libVLVG.a $VL_PATH/src/vlGraphics/lib/libV
 
 # $VL_QTLIB
 
-#$VL_PATH/src/vlGraphics/plugins/freetype/lib/libFreeType.a 
+#$VL_PATH/src/vlGraphics/plugins/freetype/lib/libFreeType.a
 
 export GCDIR="bin/packages/gc-8.2.8"
 
@@ -211,7 +211,7 @@ export QSCINTILLA_PATH=`pwd`/bin/packages/QScintilla_src-2.14.0/src
 if ! is_0 $INCLUDE_FAUSTDEV ; then
     #FAUSTLDFLAGS="-L `pwd`/bin/packages/faust/build/lib/libfaust.a -lcrypto -lncurses"
     FAUSTLDFLAGS="-L `pwd`/bin/packages/faust/build/lib/ -lfaust"
-	if ! arch |grep -e arm -e aarch64 ; then
+	if ! machine_arch |grep -e arm -e aarch64 ; then
 		FAUSTLDFLAGS="$FAUSTLDFLAGS -lcrypto -lncurses"
 	fi
     if [[ $INCLUDE_FAUSTDEV_BUT_NOT_LLVM == 1 ]] ; then
@@ -219,22 +219,22 @@ if ! is_0 $INCLUDE_FAUSTDEV ; then
     else
         LLVM_PATH=${LLVM_PATH:-} # use /bin/llvm-config from root directory if empty
         LLVM_OPTS=`$LLVM_PATH/bin/llvm-config --cppflags`
-        
+        LLVMSYSTEMLIBS=`$LLVM_PATH/bin/llvm-config --system-libs`
+
         MAYBELLVM=`$LLVM_PATH/bin/llvm-config --libdir`/libLLVM-`$LLVM_PATH/bin/llvm-config --version`.so
         if [ -f $MAYBELLVM ]; then
             LLVMLIBS=-lLLVM-`$LLVM_PATH/bin/llvm-config --version`
         else
             LLVMLIBS=`$LLVM_PATH/bin/llvm-config --libs`
         fi
-        # ($LLVMLIBS not included since it's included in libfaust)
-        FAUSTLDFLAGS="$FAUSTLDFLAGS `$PKG --libs uuid` `$LLVM_PATH/bin/llvm-config --ldflags` -ltinfo"
+        FAUSTLDFLAGS="$FAUSTLDFLAGS `$PKG --libs uuid` `$LLVM_PATH/bin/llvm-config --ldflags` $LLVMLIBS $LLVMSYSTEMLIBS -ltinfo"
     fi
 fi
 # _debug
 
 if ! is_0 $INCLUDE_PDDEV ; then
     PDLDFLAGS="bin/packages/libpd-master/libs/libpds.a"
-else    
+else
     PDLDFLAGS=""
 fi
 
@@ -261,24 +261,24 @@ export OS_JUCE_LDFLAGS="-lasound -pthread -lrt -lX11 -lXext "
 FLUIDSYNTH_LDFLAGS="bin/packages/fluidsynth-1.1.6/src/.libs/libfluidsynth.a `$PKG --libs glib-2.0`"
 
 export OS_LDFLAGS="$QSCINTILLA_PATH/libqscintilla2_qt5.a $FAUSTLDFLAGS $PDLDFLAGS pluginhost/Builds/Linux/build/libMyPluginHost.a $OS_JUCE_LDFLAGS `$PKG --libs lrdf` $GCDIR/.libs/libgc.a $PYTHONLIBPATH $PYTHONLIBNAME `$PKG --libs sndfile` `$PKG --libs samplerate` `$PKG --libs liblo` -lxcb -lxkbcommon-x11 -lxkbcommon $FLUIDSYNTH_LDFLAGS $RADIUM_BFD_LDFLAGS -liberty `$PKGqt --libs Qt5X11Extras`"
-# -lX11-xcb -lxcb-keysyms -lxcb-xkb 
+# -lX11-xcb -lxcb-keysyms
 
 if [[ $RADIUM_USE_CLANG == 0 ]] ; then
     export OS_LDFLAGS2="-ldl "
 fi
 
-# -licui18n -licuuc -licudata -lutil 
+# -licui18n -licuuc -licudata -lutil
 
 # -lgmp -lmpfr -lmpc
 
-# 
+#
 #`$PKG --libs dbus-1`
 
 #-Lbin/packages/libxcb-1.13/src/.libs
 
-# 
+#
 
-# 
+#
 
 #-L${HOME}/boost_1_60_0/stage/lib -Wl,-Bstatic -lboost_thread -lboost_system -Wl,-Bdynamic"
 
@@ -321,7 +321,7 @@ else
 		make /tmp/run_preload
 	fi
 	make radium $@ --stop # Can not use "exec make" here. Compilation stopped here I think, whether it succeeded or not.
-    
+
 	if ldd -r $RADIUM_BIN | sed 's/0x.*//' |grep -i bfd ; then
 		printf "\033[1;31mError? Is bfd linked dynamically?\033[0m"
 		exit -1
@@ -336,7 +336,7 @@ if [[ $BUILDTYPE == RELEASE ]] ; then
     strip bin/radium_check_opengl
     strip bin/radium_plugin_scanner
 fi
-    
+
 #make pluginhost/Builds/Linux/build/libMyPluginHost.a
 
 cp -f bin/run_radium_linux.sh bin/radium
@@ -355,35 +355,35 @@ do_source_sanity_checks() {
     echo
     echo "Doing some source sanity checks. This might take a few seconds...."
     echo
-    
+
     if grep static\  */*.h */*.hpp */*/*.hpp */*/*/*.hpp */*/*/*/*.hpp */*/*.h */*/*/*/*.h */*/*.cpp */*.c */*.cpp */*.m */*/*.c */*/*.cpp */*/*/*.c */*/*/*/*.c */*/*/*.cpp 2>&1 | grep "\[" | grep -v "\[\]"|grep -v static\ void |grep -v Python-2.7.18 |grep -v python2.7/ | grep -v lrdf.c|grep -v unused_files |grep -v GTK |grep -v test\/ |grep -v X11\/ |grep -v amiga |grep -v faust-examples|grep -v temp\/ |grep -v "\[NO_STATIC_ARRAY_WARNING\]" |grep -v backup |grep -v mingw |grep -v Dropbox |grep -v packages |grep -v python-midi |grep -v "No such file or directory" ; then
 	echo
 	echo "ERROR in line(s) above. Static arrays may decrease GC performance notably.";
 	echo
 	exit -1
     fi
-    
+
     if [ -d .git ] ; then
 	if git grep -n R_ASSERT|grep \=|grep -v \=\=|grep -v \!\=|grep -v \>\=|grep -v \<\= |grep -v build_linux_common.sh ; then
             echo
             echo "ERROR in line(s) above. An R_ASSERT line is possibly wrongly used.";
             echo
             exit -1
-	fi            
-	
+	fi
+
 	if git grep -n assert\(|grep -v START_JUCE_APPLICATION |grep -v assert\(\) |grep \=|grep -v \=\=|grep -v \!\=|grep -v \>\=|grep -v \<\= |grep -v build_linux_common.sh ; then
             echo
             echo "ERROR in line(s) above. An R_ASSERT line is possibly wrongly used.";
             echo
             exit -1
-	fi            
-	
+	fi
+
 	if git grep -e if\( --or -e if\ \( *|grep \=|grep -v \=\=|grep -v \!\=|grep -v \>\=|grep -v \<\=|grep -v pluginhost|grep -v bin/scheme|grep -v rtmidi|grep -v python|grep -v amiga|grep -v unused_files|grep -v weakjack|grep -v radium_wrap_1.c|grep -v keybindings.conf |grep -v bin/help ; then
             echo
             echo "ERROR in line(s) above. A single '=' can not be placed on the same line as an if.";
             echo
             exit -1
-	fi            
+	fi
     fi
 }
 
@@ -394,4 +394,3 @@ elif [ $(($RANDOM % 20)) -eq 0 ]; then
 fi
 
 echo "Build finished."
-

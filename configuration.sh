@@ -132,7 +132,7 @@ set_var MOC 0
 # The directory can be different on your system,
 # adjust as needed:
 #
-#export PATH="/usr/lib64/qt5/bin:/usr/lib/qt5/bin"${PATH:+:$PATH} 
+#export PATH="/usr/lib64/qt5/bin:/usr/lib/qt5/bin"${PATH:+:$PATH}
 
 
 
@@ -199,6 +199,18 @@ if ! is_0 $QT_PKG_CONFIGURATION_PATH ; then
     export PKGqt="PKG_CONFIG_PATH=$QT_PKG_CONFIGURATION_PATH $PKGqt"
 fi
 
+if is_0 $USE_QSVGVIEWER && is_0 $USE_QWEBENGINE ; then
+    if ! $PKGqt --exists Qt5WebKitWidgets Qt5WebKit ; then
+        if $PKGqt --exists Qt5WebEngineWidgets Qt5WebEngineCore Qt5WebEngine ; then
+            export USE_QWEBENGINE=1
+        elif $PKGqt --exists Qt5Svg ; then
+            export USE_QSVGVIEWER=1
+        else
+            handle_failure "Missing QtWebKit, QtWebEngine, and QtSvg development packages. Install one of them or set USE_QSVGVIEWER/USE_QWEBENGINE explicitly."
+        fi
+    fi
+fi
+
 if is_0 $QMAKE ; then
     if which qmake-qt5 2>/dev/null ; then
         export QMAKE=$(which qmake-qt5)
@@ -248,7 +260,7 @@ if [ "$($PKGqt --libs-only-L Qt5Core)" != "" ] ; then
     if env |grep QMAKE_LIBS_ONLY_L_SHOULD_BE_EMPTY ; then
         handle_failure "Not empty"
     fi
-        
+
     A=$($PKGqt --libs-only-L Qt5Core | xargs)
     B="-L$($QMAKE -query QT_INSTALL_PREFIX)/lib"
     if [ "$A" != "$B" ] ; then
@@ -279,47 +291,47 @@ if ! is_0 $FAUST_USES_LLVM ; then
 		if ! which llvm-config ; then
 			handle_failure "llvm-config not found"
 		fi
-	
+
 		export LLVM_CONFIG_BIN=`which llvm-config`
 	fi
-		
+
     assert_exe_exists $LLVM_CONFIG_BIN
-    
+
 	if uname -s |grep Linux > /dev/null ; then
-		
+
 		old_path=""
-   
+
 		if is_set LD_LIBRARY_PATH ; then
 			old_path=":$LD_LIBRARY_PATH"
 		fi
-    
+
 		set_var FAUST_LD_LIB_PATH "LD_LIBRARY_PATH=`${LLVM_CONFIG_BIN} --libdir`$old_path"
-	
+
 	elif uname -s |grep Darwin > /dev/null ; then
 
 		old_dy_path=""
-		
+
 		if is_set DYLD_LIBRARY_PATH ; then
 			old_dy_path=":$DYLD_LIBRARY_PATH"
 		fi
-    
+
 		set_var FAUST_LD_LIB_PATH "DYLD_LIBRARY_PATH=${ORG_PWD}/bin/packages/faust/build/lib:`${LLVM_CONFIG_BIN} --libdir`$old_dy_path"
 
     else
 		handle_failure "unknown architecture"
     fi
-    
+
 fi
 
 
 if uname -s |grep Darwin ; then
-    
+
     if ! is_0 $FAUST_USES_LLVM ; then
 	export MACOS_LLVM_TARGET=`${LLVM_CONFIG_BIN} --host-target`
     else
 	export MACOS_LLVM_TARGET="Thiscodeisnotsupposedtobecompiled"
     fi
-    
+
 fi
 
 
@@ -340,7 +352,7 @@ if ! uname -s |grep -i Linux > /dev/null ; then
     unset INCLUDE_PDDEV
     set_var INCLUDE_PDDEV 0
 fi
-if arch |grep -e arm -e aarch64 ; then
+if machine_arch |grep -e arm -e aarch64 ; then
     unset INCLUDE_PDDEV
     set_var INCLUDE_PDDEV 0
 fi

@@ -49,13 +49,22 @@ is_0()
     [ "${1}" == "0" ]
 }
 
+machine_arch()
+{
+    if command -v arch >/dev/null 2>&1 ; then
+        arch
+    else
+        uname -m
+    fi
+}
+
 #trap 'handle_failure' ERR
 
 assert_var_value()
 {
     if [ "${!1}" != "$2" ] ; then
 	handle_failure "\"${1}\" should have the value \"$2\". Instead it has the value \"${!1}\""
-    fi	
+    fi
 }
 
 
@@ -79,4 +88,3 @@ set_var()
 #set_var GAKK 4
 #echo "GAKK: -${GAKK}-"
 #exit
-

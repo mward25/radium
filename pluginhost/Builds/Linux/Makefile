@@ -8,7 +8,7 @@ ifndef CONFIG
   CONFIG=Debug
 endif
 
-DAS_ARCH:=$(shell arch)
+DAS_ARCH:=$(shell uname -m)
 DAS_OS:=$(shell uname -s)
 
 
@@ -51,7 +51,7 @@ ifdef USING_CLANG
 endif
 
 ifdef USING_GCC
-	COMMONCPPFLAGS += -Wno-class-memaccess 
+	COMMONCPPFLAGS += -Wno-class-memaccess
 	COMMONCPPFLAGS += -Wno-deprecated-copy
 endif
 
@@ -71,14 +71,14 @@ ifeq ($(CONFIG),Debug)
   OUTDIR := build
 
   ifeq ($(TARGET_ARCH),)
-    TARGET_ARCH := 
+    TARGET_ARCH :=
   endif
 
   CPPFLAGS := $(COMMONCPPFLAGS) -D_DEBUG=1
 
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0 -I../../../Qt `cat ../../../flagopts.opt`
   CXXFLAGS += $(CFLAGS) -std=gnu++17
-  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt 
+  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt
 
   TARGET ?= libMyPluginHost.a
   BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS)
@@ -93,14 +93,14 @@ ifeq ($(CONFIG),Release)
   OUTDIR := build
 
   ifeq ($(TARGET_ARCH),)
-    TARGET_ARCH := 
+    TARGET_ARCH :=
   endif
 
   CPPFLAGS := $(COMMONCPPFLAGS) -DDEB1UG=1 -DNDEBUG=1
 
-  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -I../../../Qt `cat ../../../flagopts.opt` -O3 
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -I../../../Qt `cat ../../../flagopts.opt` -O3
   CXXFLAGS += $(CFLAGS) -std=gnu++17
-  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt 
+  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt
 
   TARGET ?= libMyPluginHost.a
   BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS)

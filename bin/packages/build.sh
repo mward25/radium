@@ -34,8 +34,8 @@ if uname -s |grep Darwin ; then
     fi
     export COMMON_CFLAGS="$COMMON_CFLAGS -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 fi
-   
-if ! arch |grep -e arm -e aarch64 ; then
+
+if ! machine_arch |grep -e arm -e aarch64 ; then
     export COMMON_CFLAGS="$COMMON_CFLAGS -msse2 -mfpmath=sse "
 fi
 
@@ -70,6 +70,98 @@ PREFIX=`dirname $PWD/$0`
 #echo $PREFIX
 #exit
 
+BUILD_STATE_DIR="$PWD/.build-state"
+mkdir -p "$BUILD_STATE_DIR"
+
+artifact_exists() {
+    local pattern
+
+    for pattern in "$@" ; do
+        if compgen -G "$pattern" > /dev/null ; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+step_marker_path() {
+    echo "$BUILD_STATE_DIR/$1.ok"
+}
+
+step_completed() {
+    local step_name="$1"
+    shift
+
+    [ -f "$(step_marker_path "$step_name")" ] && artifact_exists "$@"
+}
+
+mark_step_completed() {
+    local step_name="$1"
+    shift
+
+    {
+        echo "step=$step_name"
+        echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        printf "artifacts="
+        printf "%s " "$@"
+        echo
+    } > "$(step_marker_path "$step_name")"
+}
+
+run_build_step() {
+    local step_name="$1"
+    local build_function="$2"
+    shift 2
+    local artifacts=("$@")
+
+    if is_0 "${RADIUM_FORCE_REBUILD_PACKAGES:-0}" && step_completed "$step_name" "${artifacts[@]}" ; then
+        echo "Skipping $step_name; already built successfully."
+        return
+    fi
+
+    rm -f "$(step_marker_path "$step_name")"
+    "$build_function"
+
+    if ! artifact_exists "${artifacts[@]}" ; then
+        echo "Expected build artifact for $step_name was not created."
+        exit 1
+    fi
+
+    mark_step_completed "$step_name" "${artifacts[@]}"
+}
+
+system_libxcb_is_recent_enough() {
+    if command -v pkg-config >/dev/null 2>&1 ; then
+        if pkg-config --exists xcb && pkg-config --atleast-version=1.13 xcb ; then
+            return 0
+        fi
+    fi
+
+    if [ -x ../../bin/radium_check_recent_libxcb ] ; then
+        ../../bin/radium_check_recent_libxcb >/dev/null 2>&1
+        return $?
+    fi
+
+    return 1
+}
+
+should_build_embedded_xcb() {
+    if is_defined RADIUM_BUILD_LIBXCB ; then
+        if is_0 "$RADIUM_BUILD_LIBXCB" ; then
+            return 1
+        fi
+
+        return 0
+    fi
+
+    if system_libxcb_is_recent_enough ; then
+        return 1
+    fi
+
+    return 0
+}
+
 #http://www.python.org
 #tar xvzf Python-2.2.2.tgz
 #cd Python-2.2.2
@@ -94,15 +186,18 @@ build_faust() {
 	tar xvzf faust-2.81.2.tar.gz
 	mv faust-2.81.2 faust
 	cd faust
+	sed -i.backup 's/fModule->setTargetTriple(sys::getDefaultTargetTriple());/fModule->setTargetTriple(Triple(sys::getDefaultTargetTriple()));/' compiler/generator/llvm/llvm_code_container.cpp
+	sed -i.backup 's/fModule->setTargetTriple(triple);/fModule->setTargetTriple(Triple(triple));/' compiler/generator/llvm/llvm_dynamic_dsp_aux.cpp
+	sed -i.backup2 's/fModule->setTargetTriple(TargetTriple);/fModule->setTargetTriple(Triple(TargetTriple));/' compiler/generator/llvm/llvm_dynamic_dsp_aux.cpp
 	rm -fr libraries
 	tar xvzf ../faustlibraries_2024_01_05.tar.gz
 	mv faustlibraries libraries
-	
+
 	### this line is needed to build on artix
 	#export LIBNCURSES_PATH=$(shell find /usr -name libncursesw_g.a)
-    
+
 	cp ../faust_targets.cmake build/targets/most.cmake
-    
+
 	if is_0 $FAUST_USES_LLVM ; then
 		cp ../faust_radium_nonllvm.cmake build/backends/most.cmake
 	else
@@ -111,47 +206,62 @@ build_faust() {
 		export PATH=$(dirname $LLVM_CONFIG_BIN):$PATH
 		#echo "PATH: $PATH"
 	fi
-	
+
 	# Use all CPUs when building faust.
 	JOBS=$(nproc)
 	#sed -i.backup "s/(BUILDLOCATION)$/(BUILDLOCATION) -j${JOBS}/" Makefile
 	#exit -1
 
 	echo "\n\nNote: Faust might fail if built with gcc. To work around that, simply build faust with clang instead, temporarily setting RADIUM_USE_CLANG=1 only when building faust.\n\n"
-	
+
 	# release build
 	BUILDOPT="--config Release -j${JOBS}" VERBOSE=1 CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" CMAKEOPT="-DCMAKE_BUILD_TYPE=Release -DSELF_CONTAINED_LIBRARY=on -DCMAKE_CXX_COMPILER=`which $DASCXX` -DCMAKE_C_COMPILER=`which $DASCC` " make most
-	
+
 	if ! is_0 $FAUST_USES_LLVM ; then
 		export PATH=$ORGTEMPPATH
 		unset ORGTEMPPATH
 	fi
-    
-    
+
+
 	# debug build
 	#VERBOSE=1 CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" CMAKEOPT="-DCMAKE_BUILD_TYPE=Debug -DSELF_CONTAINED_LIBRARY=on -DCMAKE_CXX_COMPILER=`which $DASCXX` -DCMAKE_C_COMPILER=`which $DASCC` " make most
-    
+
 	cd ..
 }
 
 build_Visualization-Library() {
 
     rm -fr Visualization-Library-master
-    tar xvzf Visualization-Library-master.tar.gz 
+    tar xvzf Visualization-Library-master.tar.gz
     cd Visualization-Library-master/
     patch -p1 <../visualization.patch
     sed -i.backup 's/add_subdirectory("freetype")//' src/vlGraphics/plugins/CMakeLists.txt
     #sed -i s/"VL_ACTOR_USER_DATA 0"/"VL_ACTOR_USER_DATA 1"/ src/vlCore/config.hpp
-    export MYFLAGS="-std=gnu++11 $CPPFLAGS -fPIC -g  -Wno-c++11-narrowing -Wno-deprecated-declarations -Wno-implicit-function-declaration `pkg-config --cflags freetype2` " #  -D_GLIBCXX_USE_CXX11_ABI=0
-    MYFLAGS="-std=gnu++11 $CPPFLAGS -fPIC -g -Wno-c++11-narrowing -Wno-deprecated-declarations -Wno-implicit-function-declaration `pkg-config --cflags freetype2` " #  -D_GLIBCXX_USE_CXX11_ABI=0
-	# -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG -D_GLIBCXX_DEBUG 
-    echo 'set(CMAKE_CXX_FLAGS "$MYFLAGS")' >>CMakeLists.txt
+    export MYFLAGS="-std=gnu++11 $CPPFLAGS -fPIC -g -Wno-c++11-narrowing -Wno-deprecated-declarations -Wno-deprecated-copy -Wno-class-memaccess -Wno-implicit-function-declaration `pkg-config --cflags freetype2` " #  -D_GLIBCXX_USE_CXX11_ABI=0
+    MYFLAGS="-std=gnu++11 $CPPFLAGS -fPIC -g -Wno-c++11-narrowing -Wno-deprecated-declarations -Wno-deprecated-copy -Wno-class-memaccess -Wno-implicit-function-declaration `pkg-config --cflags freetype2` " #  -D_GLIBCXX_USE_CXX11_ABI=0
+	# -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG -D_GLIBCXX_DEBUG
+    sed -i.backup2 "s|set(CMAKE_CXX_FLAGS \"-W -Wall\")|set(CMAKE_CXX_FLAGS \"-W -Wall $MYFLAGS\")|" CMakeLists.txt
     # previously used build type: RelWithDebInfo. Unfortunately, this one enable _DEBUG and various runtime checks.
 
     #CFLAGS="$CPPFLAGS -fPIC -g" CPPFLAGS="$MYFLAGS" CC="clang" CXX="clang++ $MYFLAGS" cmake -DCMAKE_CXX_FLAGS="$MYFLAGS" CMAKE_CXX_COMPILER="clang++ $MYFLAGS" -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON SUPPORT=ON -DVL_DYNAMIC_LINKING=OFF -DVL_IO_2D_PNG=OFF -DVL_IO_2D_TIFF=OFF -DVL_IO_2D_JPG=OFF -DVL_IO_2D_TGA=OFF -DVL_IO_2D_BMP=OFF .
-    
-    CFLAGS="$CPPFLAGS -fPIC -g" CPPFLAGS="$MYFLAGS" CC="$DASCC" CXX="$DASCXX $MYFLAGS" cmake -DCMAKE_CXX_FLAGS="$MYFLAGS" CMAKE_CXX_COMPILER="$DASCXX $MYFLAGS" -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON SUPPORT=ON -DVL_DYNAMIC_LINKING=OFF -DVL_IO_2D_PNG=OFF -DVL_IO_2D_TIFF=OFF -DVL_IO_2D_JPG=OFF -DVL_IO_2D_TGA=OFF -DVL_IO_2D_BMP=OFF -DVL_IO_FREETYPE=OFF .
-    
+
+    CFLAGS="$CPPFLAGS -fPIC -g" CPPFLAGS="$MYFLAGS" CC="$DASCC" CXX="$DASCXX" cmake \
+        -DCMAKE_C_COMPILER="$(which "$DASCC")" \
+        -DCMAKE_CXX_COMPILER="$(which "$DASCXX")" \
+        -DCMAKE_CXX_FLAGS="$MYFLAGS" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+        -DSUPPORT=ON \
+        -DVL_DYNAMIC_LINKING=OFF \
+        -DVL_IO_2D_PNG=OFF \
+        -DVL_IO_2D_TIFF=OFF \
+        -DVL_IO_2D_JPG=OFF \
+        -DVL_IO_2D_TGA=OFF \
+        -DVL_IO_2D_BMP=OFF \
+        -DVL_IO_FREETYPE=OFF \
+        .
+
     VERBOSE=1 make VLCore -j8
     VERBOSE=1 make VLVG/fast -j8
     VERBOSE=1 make VLGraphics/fast -j8
@@ -161,7 +271,7 @@ build_Visualization-Library() {
 build_libpds() {
 
     NOWARNS="-Wno-return-mismatch -Wno-implicit-function-declaration -Wno-int-conversion -Wno-implicit-int -Wno-strict-prototypes -Wno-incompatible-pointer-types -std=gnu17"
-    
+
     rm -fr libpd-master
     tar xvzf libpd-master.tar.gz
     cd libpd-master/
@@ -175,7 +285,7 @@ build_libpds() {
 	sed -i.backup 's/#define fsqrt sqrt/#include <math.h>\nstatic float fsqrt(float val){return sqrt(val);}/g' pure-data/extra/fiddle~/fiddle~.c
 	sed -i.backup 's/fsqrt/myfsqrt/g' pure-data/extra/fiddle~/fiddle~.c
     fi
-    
+
     make clean
     CPPFLAGS="$CFLAGS $NOWARNS" make -j`nproc`
     cd ..
@@ -254,7 +364,7 @@ build_libgig ()
 build_qscintilla() {
     # QScintilla
     rm -fr QScintilla_gpl-2.10.8 QScintilla_src-2.14.0
-    tar xvzf QScintilla_src-2.14.0.tar.gz 
+    tar xvzf QScintilla_src-2.14.0.tar.gz
     cd QScintilla_src-2.14.0/src
     echo "CONFIG += staticlib" >> qscintilla.pro
     $QMAKE
@@ -275,9 +385,9 @@ build_qscintilla() {
 #fi
 
 build_xcb() {
-    
+
     if ! is_0 ${RADIUM_BUILD_LIBXCB:-1} ; then
-	
+
         rm -fr xcb-proto-1.13/
         tar xvjf xcb-proto-1.13.tar.bz2
         cd xcb-proto-1.13/
@@ -286,9 +396,9 @@ build_xcb() {
         make -j8
         make install
         cd ..
-        
+
         rm -fr libxcb-1.13
-        tar xvjf libxcb-1.13.tar.bz2 
+        tar xvjf libxcb-1.13.tar.bz2
         cd libxcb-1.13
         #patch -p1 <../libxcb-1.12.patch
         export XCBPROTO_LIBS=`pwd`/../xcb-proto-1.13/install/lib # don't append to PKG_CONFIG_PATH because of set -u (or use default args)
@@ -296,26 +406,46 @@ build_xcb() {
         CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" CPPFLAGS="$CXXFLAGS" ./configure PYTHON=$PYTHONEXE
         CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" CPPFLAGS="$CXXFLAGS" make -j`nproc`
         cd ..
-    
+
     fi
 }
 
 source ./build_python27.sh
 
-build_Visualization-Library
+run_build_step visualization_library build_Visualization-Library \
+    "Visualization-Library-master/src/vlVG/lib/libVLVG.a"
 
-build_faust
-build_qhttpserver
-build_gc
-build_fluidsynth
-build_python27
-build_qscintilla # Note: Linking fails on Mac. Just ignore it.
+run_build_step faust build_faust \
+    "faust/build/lib/libfaust.so" \
+    "faust/build/lib/libfaust.a"
+
+run_build_step qhttpserver build_qhttpserver \
+    "qhttpserver-master/build/moc_qhttpserver.cpp"
+
+run_build_step gc build_gc \
+    "gc-8.2.8/.libs/libgc.a"
+
+run_build_step fluidsynth build_fluidsynth \
+    "fluidsynth-1.1.6/src/.libs/libfluidsynth.a"
+
+run_build_step python27 build_python27 \
+    "python27_install/bin/python2.7"
+
+run_build_step qscintilla build_qscintilla \
+    "QScintilla_src-2.14.0/src/libqscintilla2_qt5.a" # Note: Linking fails on Mac. Just ignore it.
 
 if uname -s |grep Linux ; then
-    if ! arch |grep -e arm -e aarch64 ; then
-        build_libpds
+    if ! machine_arch |grep -e arm -e aarch64 ; then
+        run_build_step libpds build_libpds \
+            "libpd-master/libs/libpds.a"
     fi
-    build_xcb
+    if should_build_embedded_xcb ; then
+        run_build_step xcb build_xcb \
+            "libxcb-1.13/src/.libs/libxcb.so" \
+            "libxcb-1.13/src/.libs/libxcb.a"
+    else
+        echo "Skipping xcb; system libxcb is recent enough."
+    fi
     echo "finished compiling libpds and xcb" # need this line to avoid script failing if the two lines above are commented out.
 fi
 
